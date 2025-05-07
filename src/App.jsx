@@ -1,12 +1,19 @@
-// App.jsx
-import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import Home from './components/pages/Home';
+import Services from './components/pages/Services';
+import Contact from './components/pages/Contact';
 
-export default function App() {
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <h1 className="text-3xl font-bold text-blue-600">
-        Welcome to DKInfraEdge LLC React site!
-      </h1>
-    </div>
-  );
-}
+const App = () => (
+  <BrowserRouter>
+    <MainLayout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </MainLayout>
+  </BrowserRouter>
+);
+
+export default App;

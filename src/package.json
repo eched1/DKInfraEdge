@@ -1,0 +1,6 @@
+"scripts": {
+  "build": "vite build",
+  "predeploy": "npm run build",
+  "deploy": "gh-pages -d dist"
+},
+"homepage": "https://yourusername.github.io/your-repo"
