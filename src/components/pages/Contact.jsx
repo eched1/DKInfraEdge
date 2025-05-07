@@ -1,33 +1,20 @@
-import { Helmet } from 'react-helmet';
-import { useForm } from 'react-hook-form';
-import Input from '../common/Input';
-import Button from '../common/Button';
+import React from "react";
+import { Helmet } from "react-helmet";
+import ContactForm from "../common/ContactForm";
 
-export default function Contact() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-
-  const onSubmit = data => alert(JSON.stringify(data));
-
+const Contact = () => {
   return (
     <>
       <Helmet>
-        <title>DKInfraEdge LLC | Contact</title>
-        <meta name="description" content="Get in touch for a consultation." />
+        <title>Contact | DKInfraEdge</title>
+        <meta name="description" content="Contact DKInfraEdge for your IT solutions." />
       </Helmet>
-      <section className="py-12 max-w-lg mx-auto">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input label="Name" id="name" {...register("name", { required: true })} />
-          {errors.name && <span className="text-red-600">Name is required</span>}
-
-          <Input label="Email" id="email" type="email" {...register("email", { required: true })} />
-          {errors.email && <span className="text-red-600">Email is required</span>}
-
-          <Input label="Message" id="message" {...register("message", { required: true })} />
-          {errors.message && <span className="text-red-600">Message is required</span>}
-
-          <Button type="submit">Send Message</Button>
-        </form>
-      </section>
+      <div className="container mx-auto p-8">
+        <h1 className="text-3xl font-bold">Contact Us</h1>
+        <ContactForm />
+      </div>
     </>
   );
-}
+};
+
+export default Contact;
