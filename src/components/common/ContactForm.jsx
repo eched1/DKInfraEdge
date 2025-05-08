@@ -1,9 +1,14 @@
 import { useForm } from 'react-hook-form';
 
 const ContactForm = () => {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
 
-  const submitForm = data => {
+  const submitForm = (data) => {
     console.log(data);
     reset();
   };

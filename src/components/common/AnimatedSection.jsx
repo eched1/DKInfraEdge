@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
 
-const AnimatedSection = ({ children, className = "" }) => (
+const AnimatedSection = ({ children, className = '' }) => (
   <motion.section
     initial={{ opacity: 0, y: 50 }}
     animate={{ opacity: 1, y: 0 }}
@@ -10,5 +11,10 @@ const AnimatedSection = ({ children, className = "" }) => (
     {children}
   </motion.section>
 );
+
+AnimatedSection.propTypes = {
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+};
 
 export default AnimatedSection;
