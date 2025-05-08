@@ -1,11 +1,15 @@
-module.exports = {
-  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
-  darkMode: false, // or 'media' or 'class'
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx}"
+  ],
   theme: {
-    extend: {},
-  },
-  variants: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: '#1E3A8A',
+        secondary: '#4F46E5',
+      },
+    },
   },
   plugins: [],
 };
