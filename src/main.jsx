@@ -5,9 +5,9 @@ import App from './App';
 import './styles/main.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <HelmetProvider>
       <App />
     </HelmetProvider>
-  </React.StrictMode>
+  //</React.StrictMode>
 );
