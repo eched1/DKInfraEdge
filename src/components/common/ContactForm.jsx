@@ -1,27 +1,48 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import Input from "./Input";
-import Button from "./Button";
+import { useForm } from 'react-hook-form';
 
 const ContactForm = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
-  const onSubmit = (data) => {
+  const submitForm = data => {
     console.log(data);
+    reset();
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
-      <Input label="Full Name" {...register("fullName", { required: true })} />
-      {errors.fullName && <span className="text-red-500">Full Name is required</span>}
+    <form onSubmit={handleSubmit(submitForm)}>
+      <input
+        {...register('fullName', { required: 'Full name is required.' })}
+        placeholder="Full Name"
+        autoComplete="name"
+        className="border p-2 w-full"
+      />
+      {errors.fullName && <span>{errors.fullName.message}</span>}
 
-      <Input label="Email Address" type="email" {...register("email", { required: true })} />
-      {errors.email && <span className="text-red-500">Email is required</span>}
+      <input
+        {...register('email', {
+          required: 'Email is required.',
+          pattern: {
+            value: /^\S+@\S+$/i,
+            message: 'Please enter a valid email.',
+          },
+        })}
+        placeholder="Email Address"
+        autoComplete="email"
+        className="border p-2 w-full mt-4"
+      />
+      {errors.email && <span>{errors.email.message}</span>}
 
-      <Input label="Message" type="textarea" {...register("message", { required: true })} />
-      {errors.message && <span className="text-red-500">Message is required</span>}
+      <textarea
+        {...register('message', { required: 'Message is required.' })}
+        placeholder="Message"
+        autoComplete="off"
+        className="border p-2 w-full mt-4"
+      />
+      {errors.message && <span>{errors.message.message}</span>}
 
-      <Button type="submit">Send Message</Button>
+      <button type="submit" className="bg-blue-500 text-white p-2 mt-4">
+        Send Message
+      </button>
     </form>
   );
 };
