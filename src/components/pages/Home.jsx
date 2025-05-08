@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import AnimatedSection from '../common/AnimatedSection';
 
 const Home = () => (

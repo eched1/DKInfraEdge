@@ -1,10 +1,10 @@
-import { Helmet } from 'react-helmet';
+import { Helmet } from "react-helmet-async";
 
 export default function Services() {
   return (
     <>
       <Helmet>
-        <title>DKInfraEdge LLC | Services</title>
+        <title>Services | DKInfraEdge</title>
         <meta name="description" content="Structured Cabling, Network Security, Cloud Integration, IT Support." />
       </Helmet>
       <section className="py-12 px-4">
