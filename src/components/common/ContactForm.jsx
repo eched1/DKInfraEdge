@@ -1,6 +1,8 @@
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 
 const ContactForm = () => {
+  const [success, setSuccess] = useState(false);
   const {
     register,
     handleSubmit,
@@ -11,6 +13,8 @@ const ContactForm = () => {
   const submitForm = (data) => {
     console.log(data);
     reset();
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 3000);
   };
 
   return (
@@ -48,6 +52,7 @@ const ContactForm = () => {
       <button type="submit" className="bg-blue-500 text-white p-2 mt-4">
         Send Message
       </button>
+      {success && <p className="text-green-600 mt-2">Message sent successfully!</p>}
     </form>
   );
 };
