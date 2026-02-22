@@ -62,41 +62,55 @@ export default async function ServiceDetailPage({ params }: PageProps) {
         }}
       />
 
-      <section className="py-20">
-        <Container>
+      {/* Hero */}
+      <section className="relative overflow-hidden py-20">
+        <div className="pointer-events-none absolute inset-0 bg-grid" />
+        <div className="glow-orb glow-orb-teal animate-pulse-slower absolute -top-20 right-1/4 h-[350px] w-[350px]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-navy via-transparent to-navy" />
+
+        <Container className="relative z-10">
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="mb-8 text-sm text-text-muted">
             <ol className="flex items-center gap-2">
-              <li>
-                <Link href="/" className="hover:text-cyan">Home</Link>
-              </li>
-              <li>/</li>
-              <li>
-                <Link href="/services" className="hover:text-cyan">Services</Link>
-              </li>
-              <li>/</li>
+              <li><Link href="/" className="hover:text-cyan transition-colors">Home</Link></li>
+              <li className="text-border-light">/</li>
+              <li><Link href="/services" className="hover:text-cyan transition-colors">Services</Link></li>
+              <li className="text-border-light">/</li>
               <li className="text-text-secondary">{service.title}</li>
             </ol>
           </nav>
 
+          <div className="flex items-start gap-5">
+            <div className="icon-glow hidden rounded-xl p-4 text-cyan sm:inline-flex">
+              {Icon && <Icon className="h-10 w-10" />}
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">
+                {service.title}
+              </h1>
+              <p className="mt-4 max-w-2xl text-lg leading-relaxed text-text-secondary">
+                {service.description}
+              </p>
+            </div>
+          </div>
+        </Container>
+        <div className="absolute bottom-0 left-0 right-0 separator-glow" />
+      </section>
+
+      {/* Content */}
+      <section className="relative py-20">
+        <div className="pointer-events-none absolute inset-0 bg-dots opacity-20" />
+        <Container className="relative z-10">
           <div className="grid gap-12 lg:grid-cols-3">
             {/* Main content */}
             <div className="lg:col-span-2">
-              <div className="mb-6 inline-flex rounded-xl bg-teal/10 p-4 text-teal-light">
-                {Icon && <Icon className="h-10 w-10" />}
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight">
-                {service.title}
-              </h1>
-              <p className="mt-4 text-lg leading-relaxed text-text-secondary">
-                {service.description}
-              </p>
-
-              <h2 className="mt-10 text-2xl font-semibold">What We Deliver</h2>
-              <ul className="mt-4 space-y-3" role="list">
+              <h2 className="text-2xl font-semibold">
+                What We <span className="text-gradient">Deliver</span>
+              </h2>
+              <ul className="mt-6 space-y-4" role="list">
                 {service.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-3">
-                    <span className="mt-0.5 inline-flex rounded-full bg-success/10 p-1 text-success">
+                    <span className="mt-0.5 inline-flex rounded-full bg-gradient-to-br from-success/20 to-teal/10 p-1.5 text-success border border-success/20">
                       <CheckIcon className="h-4 w-4" />
                     </span>
                     <span className="text-text-secondary">{feature}</span>
@@ -104,16 +118,16 @@ export default async function ServiceDetailPage({ params }: PageProps) {
                 ))}
               </ul>
 
-              <div className="mt-10">
-                <Button href="/contact" size="lg">
+              <div className="mt-12">
+                <Button href="/contact" size="lg" className="btn-glow">
                   Discuss Your Project
                 </Button>
               </div>
             </div>
 
-            {/* Sidebar: other services */}
+            {/* Sidebar */}
             <aside>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-text-muted">
                 Other Services
               </h3>
               <div className="mt-4 space-y-3">
@@ -122,13 +136,13 @@ export default async function ServiceDetailPage({ params }: PageProps) {
                   return (
                     <Link key={s.slug} href={`/services/${s.slug}`}>
                       <Card hover className="group flex items-center gap-3">
-                        <div className="inline-flex rounded-lg bg-teal/10 p-2 text-teal-light">
+                        <div className="icon-glow inline-flex rounded-lg p-2 text-cyan">
                           {SIcon && <SIcon className="h-5 w-5" />}
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{s.title}</p>
+                          <p className="text-sm font-medium group-hover:text-cyan transition-colors">{s.title}</p>
                         </div>
-                        <ArrowRightIcon className="h-4 w-4 text-text-muted group-hover:text-cyan" />
+                        <ArrowRightIcon className="h-4 w-4 text-text-muted group-hover:text-cyan transition-colors" />
                       </Card>
                     </Link>
                   );

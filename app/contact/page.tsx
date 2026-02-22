@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
-import { Card } from "@/components/ui/card";
 import { ContactForm } from "@/components/contact/contact-form";
 import { SITE_URL } from "@/lib/constants";
 import { breadcrumbJsonLd } from "@/lib/structured-data";
@@ -27,11 +26,19 @@ export default function ContactPage() {
         }}
       />
 
-      <section className="py-20">
-        <Container>
+      <section className="relative overflow-hidden py-24">
+        <div className="pointer-events-none absolute inset-0 bg-grid" />
+        <div className="glow-orb glow-orb-teal animate-pulse-slow absolute -top-20 right-1/3 h-[350px] w-[350px]" />
+        <div className="glow-orb glow-orb-cyan animate-pulse-slower absolute bottom-0 left-1/4 h-[250px] w-[250px]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-navy via-transparent to-navy" />
+
+        <Container className="relative z-10">
           <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            <span className="inline-block text-sm font-semibold uppercase tracking-widest text-teal-light">
               Get in Touch
+            </span>
+            <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+              Start the <span className="text-gradient-bright">conversation</span>
             </h1>
             <p className="mt-4 text-lg text-text-secondary">
               Tell us about your infrastructure challenge. We&rsquo;ll respond
@@ -39,10 +46,12 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="mx-auto mt-12 max-w-2xl">
-            <Card className="relative p-8">
-              <ContactForm />
-            </Card>
+          <div className="mx-auto mt-14 max-w-2xl">
+            <div className="card-glow rounded-2xl p-8 sm:p-10">
+              <div className="relative z-10">
+                <ContactForm />
+              </div>
+            </div>
           </div>
         </Container>
       </section>
