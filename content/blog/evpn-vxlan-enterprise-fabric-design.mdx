@@ -1,0 +1,78 @@
+---
+title: "EVPN-VXLAN Fabric Design: A Practical Guide for Enterprise Networks"
+description: "A hands-on walkthrough of designing and deploying EVPN-VXLAN data center fabrics using Juniper and Fortinet, covering spine-leaf topology, overlay design, and operational considerations."
+date: "2025-01-15"
+author: "DK Infra Edge"
+category: "Networking"
+tags: ["EVPN", "VXLAN", "Juniper", "Data Center", "Fabric"]
+---
+
+## Why EVPN-VXLAN?
+
+Traditional VLAN-based networks hit a wall at scale. Spanning tree becomes a liability, VLAN IDs max out at 4094, and east-west traffic patterns in modern data centers demand something better.
+
+EVPN-VXLAN solves this by separating the **underlay** (routed IP fabric) from the **overlay** (VXLAN tunnels with EVPN control plane). The result: a scalable, multi-tenant network fabric that eliminates STP, supports Layer 2 extension across routed boundaries, and provides built-in multi-tenancy.
+
+## Spine-Leaf Topology
+
+The foundation of any EVPN-VXLAN fabric is a spine-leaf architecture:
+
+- **Leaf switches**: Connect to servers, storage, and services. Act as VXLAN Tunnel Endpoints (VTEPs).
+- **Spine switches**: Provide interconnection between all leaf switches. No VTEPs here—pure routing.
+
+```
+       ┌──────┐   ┌──────┐
+       │Spine1│   │Spine2│
+       └──┬───┘   └───┬──┘
+     ┌────┴────┬──────┬┴────┐
+  ┌──┴──┐  ┌──┴──┐ ┌─┴──┐ ┌┴───┐
+  │Leaf1│  │Leaf2│ │Leaf3│ │Leaf4│
+  └─────┘  └─────┘ └────┘ └─────┘
+```
+
+Every leaf has a BGP session to every spine. The underlay uses eBGP (one AS per leaf, one AS per spine) or iBGP with route reflectors. We prefer **eBGP underlay** for its simplicity and debuggability.
+
+## Overlay Design Decisions
+
+### Route Type Selection
+
+EVPN defines several route types. The ones you'll use most:
+
+| Route Type | Purpose |
+|-----------|---------|
+| Type 2 | MAC/IP advertisement |
+| Type 3 | Inclusive multicast ethernet tag |
+| Type 5 | IP prefix route (inter-VRF) |
+
+For most enterprise deployments, **Type 2 + Type 5** cover 95% of use cases. Type 2 handles intra-subnet traffic and ARP suppression. Type 5 enables inter-VRF routing without stitching Type 2 routes.
+
+### BUM Traffic Handling
+
+Broadcast, Unknown Unicast, and Multicast (BUM) traffic needs a replication strategy:
+
+- **Ingress replication**: Each VTEP unicasts BUM frames to every remote VTEP. Simple, no multicast required. Works well for fabrics under ~50 VTEPs.
+- **Multicast underlay**: Uses PIM to replicate BUM traffic efficiently. Better for large-scale fabrics but adds operational complexity.
+
+We default to **ingress replication** unless the fabric exceeds 40-50 leaf switches.
+
+## Operational Considerations
+
+### Day 2 Readiness
+
+A fabric is only as good as its operability. Before go-live:
+
+1. **Monitoring**: SNMP polling on all underlay interfaces, BGP session alerting, VXLAN tunnel health checks.
+2. **Automation**: Ansible playbooks for VLAN/VNI provisioning. Never hand-configure a VXLAN mapping.
+3. **Documentation**: Underlay IP plan, VNI allocation table, BGP ASN map, and a physical topology diagram that matches reality.
+
+### Common Pitfalls
+
+- **MTU mismatches**: VXLAN adds 50-54 bytes of overhead. If your underlay MTU is 1500, inner frames get fragmented. Set underlay MTU to **9216** on all fabric interfaces.
+- **ARP suppression disabled**: Without it, every ARP request floods across the entire fabric. Enable it on every IRB/SVI.
+- **No route leak policy**: Without explicit route targets and route policies, tenants can leak routes into each other's VRFs. Always define explicit import/export policies.
+
+## Next Steps
+
+In the next post, we'll walk through a complete Juniper QFX configuration for a 4-leaf, 2-spine fabric with two tenants and inter-VRF routing. We'll include the Ansible playbooks to deploy it.
+
+If you're planning an EVPN-VXLAN deployment and want a second set of eyes on the design, [reach out to us](/contact).

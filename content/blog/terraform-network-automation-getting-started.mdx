@@ -1,0 +1,133 @@
+---
+title: "Getting Started with Terraform for Network Infrastructure"
+description: "How to use Terraform to manage network infrastructure as code—from provider setup to state management and CI/CD integration for Fortinet, AWS, and more."
+date: "2025-02-10"
+author: "DK Infra Edge"
+category: "Automation"
+tags: ["Terraform", "IaC", "Network Automation", "DevOps", "Fortinet"]
+---
+
+## Why Terraform for Networking?
+
+Network engineers have traditionally managed infrastructure through CLI sessions and copy-paste configs. Terraform changes this by treating network configuration as **versionable, reviewable, and repeatable code**.
+
+The benefits are immediate:
+
+- **Drift detection**: Know when reality diverges from your intended state.
+- **Peer review**: Every change goes through a pull request before it touches production.
+- **Rollback**: Revert to any previous state with `terraform apply` on an older commit.
+- **Blast radius control**: Use `terraform plan` to see exactly what will change before applying.
+
+## Provider Ecosystem
+
+Terraform's strength is its provider model. For network infrastructure, the key providers are:
+
+```hcl
+terraform {
+  required_providers {
+    fortios = {
+      source  = "fortinetdev/fortios"
+      version = "~> 1.18"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    junos = {
+      source  = "jeremmfr/junos"
+      version = "~> 2.5"
+    }
+  }
+}
+```
+
+Each provider speaks the device's API natively—FortiOS REST API, AWS API, Junos NETCONF. You write HCL; the provider translates.
+
+## A Practical Example: FortiGate Firewall Policy
+
+Here's a real-world example—managing FortiGate firewall policies with Terraform:
+
+```hcl
+resource "fortios_firewall_policy" "allow_web_to_db" {
+  name   = "web-to-db"
+  action = "accept"
+
+  srcintf {
+    name = "web-zone"
+  }
+  dstintf {
+    name = "db-zone"
+  }
+  srcaddr {
+    name = "web-servers"
+  }
+  dstaddr {
+    name = "db-servers"
+  }
+  service {
+    name = "PostgreSQL"
+  }
+
+  logtraffic = "all"
+  comments   = "Managed by Terraform - do not edit manually"
+}
+```
+
+This policy is now:
+- In version control
+- Reviewed by your team before deployment
+- Auditable (who changed what, when, and why)
+- Reproducible across environments
+
+## State Management
+
+Terraform state is the mapping between your HCL code and the real world. For team environments, **remote state is non-negotiable**.
+
+Options we recommend:
+
+| Backend | Best For |
+|---------|----------|
+| S3 + DynamoDB | AWS-native teams, state locking built-in |
+| Terraform Cloud | Teams wanting managed state + run history |
+| Azure Blob Storage | Azure-native teams |
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "dk-terraform-state"
+    key            = "network/fortigate/production.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks"
+    encrypt        = true
+  }
+}
+```
+
+**Never store state locally for shared infrastructure.** A state conflict will ruin your day.
+
+## CI/CD Integration
+
+The real power comes when you integrate Terraform into your CI/CD pipeline:
+
+1. **PR opened**: `terraform plan` runs automatically, output posted as a PR comment.
+2. **PR approved**: Merge triggers `terraform apply` with the saved plan.
+3. **Post-apply**: Notify Slack, update CMDB, run validation tests.
+
+This removes the "one engineer with the keys" bottleneck and creates an auditable, automated change process.
+
+## Common Mistakes
+
+- **No state locking**: Two engineers running `apply` simultaneously will corrupt state. Always use a backend with locking.
+- **Monolithic state**: Don't put your entire infrastructure in one state file. Split by environment, by service, or by blast radius.
+- **Hardcoded secrets**: Use `var` blocks with environment variables or a secrets manager. Never commit API keys to your repo.
+- **Ignoring plan output**: Always read the plan. A one-line change in HCL can trigger a destroy-and-recreate.
+
+## Getting Started
+
+1. Install Terraform and configure your provider credentials.
+2. Start with a single, non-critical resource (a firewall address object, an AWS security group).
+3. Set up remote state from day one.
+4. Add `terraform plan` to your PR workflow.
+5. Expand scope gradually—more resources, more environments.
+
+Need help building a Terraform pipeline for your network infrastructure? [Let's talk](/contact).
