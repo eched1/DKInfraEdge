@@ -1,0 +1,140 @@
+---
+title: "Building a Network Monitoring Stack with Prometheus and Grafana"
+description: "How to deploy Prometheus and Grafana for network infrastructure monitoring—from SNMP exporter setup to alerting rules and dashboard design."
+date: "2025-03-05"
+author: "DK Infra Edge"
+category: "Observability"
+tags: ["Prometheus", "Grafana", "SNMP", "Monitoring", "Alerting"]
+---
+
+## The Problem with Traditional Network Monitoring
+
+Most network teams still rely on tools that poll SNMP every 5 minutes, store data in RRD files, and send email alerts that nobody reads. This worked in 2010. It doesn't work when you're running a multi-site fabric with hundreds of interfaces, overlay tunnels, and dynamic routing.
+
+Modern network monitoring needs:
+
+- **Sub-minute polling** for critical metrics
+- **Dimensional data** (labels, not just OIDs)
+- **Powerful query language** for ad-hoc investigation
+- **Flexible alerting** with escalation and silencing
+- **Dashboards** that actually help during incidents
+
+Prometheus + Grafana delivers all of this.
+
+## Architecture Overview
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────┐
+│ Network      │────▶│ SNMP         │────▶│Prometheus│
+│ Devices      │SNMP │ Exporter     │scrape│          │
+└─────────────┘     └──────────────┘     └────┬────┘
+                                               │
+                    ┌──────────────┐           │query
+                    │ Alertmanager │◀──────────┤
+                    └──────┬───────┘           │
+                           │                   ▼
+                    ┌──────▼───────┐     ┌─────────┐
+                    │ PagerDuty/   │     │ Grafana  │
+                    │ Slack/Email  │     └─────────┘
+                    └──────────────┘
+```
+
+The key component is the **SNMP Exporter**. It translates SNMP OIDs into Prometheus metrics with proper labels.
+
+## SNMP Exporter Configuration
+
+The SNMP exporter uses a generator to build its configuration from MIBs. Here's a snippet for common network metrics:
+
+```yaml
+# snmp.yml (generated, then customized)
+modules:
+  if_mib:
+    walk:
+      - ifDescr
+      - ifOperStatus
+      - ifHCInOctets
+      - ifHCOutOctets
+      - ifInErrors
+      - ifOutErrors
+      - ifInDiscards
+      - ifOutDiscards
+    lookups:
+      - source_indexes: [ifIndex]
+        lookup: ifDescr
+    overrides:
+      ifDescr:
+        type: DisplayString
+```
+
+This gives you per-interface metrics with human-readable interface names as labels—no more decoding OID indexes.
+
+## Essential Alerting Rules
+
+Start with these alerts. They catch 80% of network issues:
+
+```yaml
+groups:
+  - name: network
+    rules:
+      - alert: InterfaceDown
+        expr: ifOperStatus{ifDescr!~".*Vlan.*"} == 2
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Interface {{ $labels.ifDescr }} is down on {{ $labels.instance }}"
+
+      - alert: HighInterfaceErrors
+        expr: rate(ifInErrors[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.ifDescr }} ({{ $labels.instance }})"
+
+      - alert: InterfaceUtilization
+        expr: |
+          (rate(ifHCInOctets[5m]) * 8) / (ifHighSpeed * 1e6) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.ifDescr }} on {{ $labels.instance }} above 85% utilization"
+```
+
+**Key principle**: Alert on symptoms, not causes. An interface error rate matters more than a CPU spike.
+
+## Dashboard Design
+
+A good network dashboard answers these questions at a glance:
+
+1. **Are all critical links up?** (Status panel with interface states)
+2. **Where's the traffic?** (Top-N interfaces by throughput)
+3. **Are there errors?** (Error/discard rate graphs)
+4. **Is anything saturated?** (Utilization percentages)
+
+Avoid the temptation to put 50 panels on one dashboard. Create a **hierarchy**:
+
+- **Overview**: Site-level health, top issues
+- **Site detail**: Per-device status, link utilization
+- **Device detail**: All interfaces, CPU, memory, BGP sessions
+
+## Prometheus Retention and Storage
+
+For network monitoring, we recommend:
+
+- **Scrape interval**: 30s for critical infrastructure, 60s for everything else
+- **Retention**: 15-30 days in local storage
+- **Long-term**: Ship to Thanos or Cortex for 12+ month retention and cross-site queries
+
+Don't over-retain in Prometheus itself—it's designed for recent, high-resolution data.
+
+## Getting Started
+
+1. Deploy Prometheus and the SNMP exporter (Docker Compose works fine for small deployments)
+2. Add your network devices to the SNMP exporter's target list
+3. Import community Grafana dashboards as a starting point (dashboard IDs 11190, 12489)
+4. Define your first alerting rules
+5. Connect Alertmanager to Slack or PagerDuty
+
+If you need help designing a monitoring stack for your network, [we can help](/contact).
