@@ -17,11 +17,11 @@ export function BlogCard({ post }: BlogCardProps) {
 
   return (
     <Link href={`/blog/${post.slug}`}>
-      <Card hover className="group flex h-full flex-col">
+      <Card glow hover className="group flex h-full flex-col">
         <div className="flex items-center gap-2">
           <Badge variant="teal">{post.category}</Badge>
         </div>
-        <h2 className="mt-3 text-lg font-semibold leading-snug group-hover:text-cyan">
+        <h2 className="mt-3 text-lg font-semibold leading-snug group-hover:text-cyan transition-colors">
           {post.title}
         </h2>
         <p className="mt-2 flex-1 text-sm leading-relaxed text-text-secondary">
@@ -32,7 +32,7 @@ export function BlogCard({ post }: BlogCardProps) {
             <CalendarIcon className="h-3.5 w-3.5" />
             {formattedDate}
           </span>
-          <span className="flex items-center gap-1 font-medium text-cyan group-hover:text-cyan-light">
+          <span className="flex items-center gap-1 font-medium text-cyan transition-all group-hover:text-cyan-light group-hover:gap-2">
             Read <ArrowRightIcon className="h-3.5 w-3.5" />
           </span>
         </div>
